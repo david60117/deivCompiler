@@ -67,26 +67,56 @@ class Ui_MainWindow(object):
         self.layoutEncabezado.addLayout(self.layoutTitulo)
 
         self.layoutAcciones = QHBoxLayout()
-        self.layoutAcciones.setSpacing(6)
+        self.layoutAcciones.setSpacing(10)
         self.layoutAcciones.setObjectName(u"layoutAcciones")
         self.layoutAcciones.setContentsMargins(0, 0, 0, 0)
         self.btnNuevo = QPushButton(self.encabezado)
         self.btnNuevo.setObjectName(u"btnNuevo")
+        self.btnNuevo.setIconSize(QSize(18, 18))
         self.btnNuevo.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
         self.layoutAcciones.addWidget(self.btnNuevo)
 
         self.btnAbrir = QPushButton(self.encabezado)
         self.btnAbrir.setObjectName(u"btnAbrir")
+        self.btnAbrir.setIconSize(QSize(18, 18))
         self.btnAbrir.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
         self.layoutAcciones.addWidget(self.btnAbrir)
 
         self.btnGuardar = QPushButton(self.encabezado)
         self.btnGuardar.setObjectName(u"btnGuardar")
+        self.btnGuardar.setIconSize(QSize(18, 18))
         self.btnGuardar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
         self.layoutAcciones.addWidget(self.btnGuardar)
+
+        self.btnCopiar = QPushButton(self.encabezado)
+        self.btnCopiar.setObjectName(u"btnCopiar")
+        self.btnCopiar.setIconSize(QSize(18, 18))
+        self.btnCopiar.setFocusPolicy(Qt.NoFocus)
+        self.btnCopiar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.layoutAcciones.addWidget(self.btnCopiar)
+
+        self.btnPegar = QPushButton(self.encabezado)
+        self.btnPegar.setObjectName(u"btnPegar")
+        self.btnPegar.setIconSize(QSize(18, 18))
+        self.btnPegar.setFocusPolicy(Qt.NoFocus)
+        self.btnPegar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.layoutAcciones.addWidget(self.btnPegar)
+
+        self.separadorAcciones = QFrame(self.encabezado)
+        self.separadorAcciones.setObjectName(u"separadorAcciones")
+        self.separadorAcciones.setMaximumSize(QSize(16777215, 30))
+        self.separadorAcciones.setFrameShape(QFrame.VLine)
+
+        self.layoutAcciones.addWidget(self.separadorAcciones)
+
+        self.espacioAcciones = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.layoutAcciones.addItem(self.espacioAcciones)
 
         self.btnLexico = QPushButton(self.encabezado)
         self.btnLexico.setObjectName(u"btnLexico")
@@ -117,10 +147,6 @@ class Ui_MainWindow(object):
         self.btnEjecutar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
         self.layoutAcciones.addWidget(self.btnEjecutar)
-
-        self.espacioAcciones = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.layoutAcciones.addItem(self.espacioAcciones)
 
 
         self.layoutEncabezado.addLayout(self.layoutAcciones)
@@ -378,9 +404,11 @@ class Ui_MainWindow(object):
         self.iconoApp.setText(QCoreApplication.translate("MainWindow", u"</>", None))
         self.titulo.setText(QCoreApplication.translate("MainWindow", u"Compiler Studio", None))
         self.indicadorEstado.setText(QCoreApplication.translate("MainWindow", u"Listo", None))
-        self.btnNuevo.setText(QCoreApplication.translate("MainWindow", u"Nuevo", None))
-        self.btnAbrir.setText(QCoreApplication.translate("MainWindow", u"Abrir", None))
-        self.btnGuardar.setText(QCoreApplication.translate("MainWindow", u"Guardar", None))
+        self.btnNuevo.setText(QCoreApplication.translate("MainWindow", u" Nuevo", None))
+        self.btnAbrir.setText(QCoreApplication.translate("MainWindow", u" Abrir", None))
+        self.btnGuardar.setText(QCoreApplication.translate("MainWindow", u" Guardar", None))
+        self.btnCopiar.setText(QCoreApplication.translate("MainWindow", u" Copiar", None))
+        self.btnPegar.setText(QCoreApplication.translate("MainWindow", u" Pegar", None))
         self.btnLexico.setText(QCoreApplication.translate("MainWindow", u"An\u00e1lisis l\u00e9xico", None))
         self.btnLexico.setProperty(u"tipo", QCoreApplication.translate("MainWindow", u"primario", None))
         self.btnSintactico.setText(QCoreApplication.translate("MainWindow", u"An\u00e1lisis sint\u00e1ctico", None))
