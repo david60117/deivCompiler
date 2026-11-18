@@ -1,4 +1,6 @@
+import io
 import sys
+from contextlib import redirect_stdout
 from pathlib import Path
 from pprint import pformat
 
@@ -10,7 +12,7 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 
-from compilador import generacion, lexico, semantico, sintactico
+from compilador import generacion, interprete, lexico, semantico, sintactico
 from interfaz.principal import Ui_MainWindow
 
 CARPETA = Path(__file__).resolve().parent
@@ -52,8 +54,6 @@ class Window(QMainWindow, Ui_MainWindow):
                       (self.checkSintactico, self.textoSintactico),
                       (self.checkSemantico, self.textoSemantico),
                       (self.checkCodigo, self.textoCodigo)]
-        # Fases que todavía no están programadas: sus botones se quedan desactivados
-        self.pendientes = [self.btnEjecutar]
 
         self.btnNuevo.clicked.connect(self.nuevo_archivo)
         self.btnAbrir.clicked.connect(self.abrir_archivo)
@@ -62,6 +62,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.btnSintactico.clicked.connect(self.analisis_sintactico)
         self.btnSemantico.clicked.connect(self.analisis_semantico)
         self.btnGenerarCodigo.clicked.connect(self.codigo_intermedio)
+        self.btnEjecutar.clicked.connect(self.ejecutar)
         self.btnCerrarConsola.clicked.connect(self.ocultar_consola)
         self.editor.textChanged.connect(self.codigo_modificado)
 
@@ -139,12 +140,11 @@ class Window(QMainWindow, Ui_MainWindow):
 
     # ---------------- Botones y diagnóstico ----------------
     def actualizar_botones(self):
-        """Cada fase se activa solo si pasó la anterior; las que faltan por programar siguen apagadas."""
+        """Cada fase se activa solo si pasó la anterior; Ejecutar tras el semántico."""
         self.btnLexico.setEnabled(bool(self.editor.toPlainText().strip()))
         for i, boton in enumerate(self.botones_fase[1:], start=1):
             boton.setEnabled(self.completadas >= i)
-        for boton in self.pendientes:
-            boton.setEnabled(False)
+        self.btnEjecutar.setEnabled(self.completadas >= 3)
 
     def marcar_fase(self, indice, correcta=True):
         for widget in self.fases[indice]:
@@ -222,6 +222,18 @@ class Window(QMainWindow, Ui_MainWindow):
             lineas = generacion.generar_codigo(self.arbol)
             return "\n".join(lineas), f"Código intermedio generado: {len(lineas)} instrucciones."
         self.correr_fase(3, "Código intermedio", fase)
+
+    def ejecutar(self):
+        captura = io.StringIO()
+        try:
+            with redirect_stdout(captura):      # lo que imprime "invocar" va a la consola
+                interprete.ejecutar(self.arbol, {})
+        except Exception as error:
+            salida = (captura.getvalue() + str(error)).strip()
+            self.mostrar_consola(salida, "La ejecución se detuvo por un error.", error=True)
+        else:
+            salida = captura.getvalue().rstrip("\n") or "(el programa no mostró nada)"
+            self.mostrar_consola(salida, "Proceso finalizado correctamente.")
 
 
 app = QApplication(sys.argv)
