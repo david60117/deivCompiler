@@ -4,7 +4,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from pprint import pformat
 
-from PySide6.QtGui import QFont, QFontDatabase
+from PySide6.QtGui import QFont, QFontDatabase, QIcon
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -48,6 +48,11 @@ class Window(QMainWindow, Ui_MainWindow):
             fuente.setFamily(mono)
             widget.setFont(fuente)
 
+        # Iconos de la barra de herramientas (interfaz/iconos/*.svg)
+        for boton, icono in ((self.btnNuevo, "nuevo"), (self.btnAbrir, "abrir"), (self.btnGuardar, "guardar"),
+                             (self.btnCopiar, "copiar"), (self.btnPegar, "pegar")):
+            boton.setIcon(QIcon(str(CARPETA / "interfaz" / "iconos" / f"{icono}.svg")))
+
         # Botones de fase y filas del diagnóstico (icono, texto), en el mismo orden
         self.botones_fase = [self.btnLexico, self.btnSintactico, self.btnSemantico, self.btnGenerarCodigo]
         self.fases = [(self.checkLexico, self.textoLexico),
@@ -58,6 +63,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.btnNuevo.clicked.connect(self.nuevo_archivo)
         self.btnAbrir.clicked.connect(self.abrir_archivo)
         self.btnGuardar.clicked.connect(self.guardar_archivo)
+        self.btnCopiar.clicked.connect(self.copiar)
+        self.btnPegar.clicked.connect(self.pegar)
         self.btnLexico.clicked.connect(self.analisis_lexico)
         self.btnSintactico.clicked.connect(self.analisis_sintactico)
         self.btnSemantico.clicked.connect(self.analisis_semantico)
@@ -137,6 +144,18 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.archivo_actual = archivo
         self.poner_nombre(Path(archivo).name)
+
+    # ---------------- Edición ----------------
+    def copiar(self):
+        """Copia lo seleccionado; si no hay selección, copia todo el código."""
+        if self.editor.textCursor().hasSelection():
+            self.editor.copy()
+        else:
+            QApplication.clipboard().setText(self.editor.toPlainText())
+
+    def pegar(self):
+        """Pega el texto del portapapeles donde está el cursor."""
+        self.editor.paste()
 
     # ---------------- Botones y diagnóstico ----------------
     def actualizar_botones(self):
