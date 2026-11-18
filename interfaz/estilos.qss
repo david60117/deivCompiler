@@ -1,0 +1,59 @@
+/* Compiler Studio - estilos (colores del diseño de Figma) */
+
+QWidget { font-size: 14px; color: #0F172A; }
+#central { background: #F8FAFC; }
+
+/* A. Encabezado */
+#encabezado { background: #F8FAFC; border-bottom: 1px solid #E2E8F0; }
+#iconoApp { color: #2563EB; font-size: 18px; font-weight: 700; }
+#titulo { font-size: 17px; font-weight: 600; }
+#indicadorEstado, #indicadorAnalisis {
+    background: #DCFCE7; color: #15803D; font-size: 13px; font-weight: 600;
+    border-radius: 11px; padding: 3px 10px;
+}
+
+QPushButton {
+    background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 7px;
+    padding: 6px 11px; font-size: 14px;
+}
+QPushButton:hover { background: #E2E8F0; }
+QPushButton[tipo="primario"] { background: #2563EB; border-color: #2563EB; color: #FFFFFF; }
+QPushButton[tipo="primario"]:hover { background: #1D4ED8; }
+QPushButton[tipo="exito"] { background: #15803D; border-color: #15803D; color: #FFFFFF; }
+QPushButton[tipo="exito"]:hover { background: #166534; }
+QPushButton:disabled, QPushButton[tipo="primario"]:disabled, QPushButton[tipo="exito"]:disabled {
+    background: #E2E8F0; border-color: #E2E8F0; color: #94A3B8;
+}
+
+/* B. Explorador de archivos */
+#explorador { background: #F8FAFC; border-right: 1px solid #E2E8F0; }
+#tituloArchivos, #tituloConsola { color: #475569; font-size: 12px; font-weight: 600; }
+#listaArchivos { background: transparent; border: none; outline: 0; }
+#listaArchivos::item { padding: 7px 8px; border-radius: 7px; color: #0F172A; }
+#listaArchivos::item:selected { background: #DBEAFE; }
+
+/* C. Editor */
+#archivoActual { font-weight: 600; }
+#etiquetaEditor { color: #64748B; }
+#editor {
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px;
+    font-size: 15px; padding: 6px 4px;
+}
+
+/* D. Diagnóstico y E. Consola */
+#diagnostico, #consola { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; }
+#tituloDiagnostico { font-size: 17px; font-weight: 600; }
+
+QLabel[rol="check"] {
+    background: #CBD5E1; color: #FFFFFF; border-radius: 8px; font-size: 11px; font-weight: 700;
+    min-width: 16px; max-width: 16px; min-height: 16px; max-height: 16px;
+}
+QLabel[rol="check"][marcada="true"] { background: #16A34A; }
+QLabel[rol="fase"] { color: #64748B; }
+QLabel[rol="fase"][marcada="true"] { color: #1E293B; }
+
+#btnCerrarConsola { background: transparent; border: none; color: #64748B; font-size: 14px; }
+#btnCerrarConsola:hover { color: #0F172A; }
+/* Misma tipografía que el editor, sin colores */
+#salida { background: #FFFFFF; border: none; color: #0F172A; font-size: 15px; font-weight: 400; }
+#mensaje { color: #64748B; }
