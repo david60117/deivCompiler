@@ -6,3 +6,7 @@
 
 # --- Archivos del sistema operativo (macOS) ---
 .DS_Store
+
+# --- Tablas que PLY genera solo al correr el parser ---
+compilador/parsetab.py
+compilador/parser.out
