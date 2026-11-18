@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 
+from compilador import lexico
 from interfaz.principal import Ui_MainWindow
 
 CARPETA = Path(__file__).resolve().parent
@@ -35,6 +36,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle("Compiler Studio")
         self.archivo_actual = None      # None = main.deiv sin guardar
+        self.completadas = 0            # cuántas fases seguidas han pasado
 
         mono = elegir_fuente(("JetBrains Mono", "Menlo", "Consolas", "DejaVu Sans Mono"), "Courier New")
         for widget in (self.editor, self.salida):
@@ -42,19 +44,21 @@ class Window(QMainWindow, Ui_MainWindow):
             fuente.setFamily(mono)
             widget.setFont(fuente)
 
-        # Filas del diagnóstico (icono, texto), una por fase
+        # Botones de fase y filas del diagnóstico (icono, texto), en el mismo orden
+        self.botones_fase = [self.btnLexico, self.btnSintactico, self.btnSemantico, self.btnGenerarCodigo]
         self.fases = [(self.checkLexico, self.textoLexico),
                       (self.checkSintactico, self.textoSintactico),
                       (self.checkSemantico, self.textoSemantico),
                       (self.checkCodigo, self.textoCodigo)]
         # Fases que todavía no están programadas: sus botones se quedan desactivados
-        self.pendientes = [self.btnLexico, self.btnSintactico, self.btnSemantico,
-                           self.btnGenerarCodigo, self.btnEjecutar]
+        self.pendientes = [self.btnSintactico, self.btnSemantico, self.btnGenerarCodigo, self.btnEjecutar]
 
         self.btnNuevo.clicked.connect(self.nuevo_archivo)
         self.btnAbrir.clicked.connect(self.abrir_archivo)
         self.btnGuardar.clicked.connect(self.guardar_archivo)
+        self.btnLexico.clicked.connect(self.analisis_lexico)
         self.btnCerrarConsola.clicked.connect(self.ocultar_consola)
+        self.editor.textChanged.connect(self.codigo_modificado)
 
         self.listaArchivos.setCurrentRow(0)
         self.reiniciar_diagnostico()
@@ -97,7 +101,7 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(self, "Abrir archivo", f"No se pudo abrir el archivo:\n{error}")
             return
 
-        self.editor.setPlainText(contenido)
+        self.editor.setPlainText(contenido)     # reinicia el diagnóstico
         self.archivo_actual = archivo
         self.poner_nombre(Path(archivo).name)
         self.ocultar_consola()
@@ -130,6 +134,10 @@ class Window(QMainWindow, Ui_MainWindow):
 
     # ---------------- Botones y diagnóstico ----------------
     def actualizar_botones(self):
+        """Cada fase se activa solo si pasó la anterior; las que faltan por programar siguen apagadas."""
+        self.btnLexico.setEnabled(bool(self.editor.toPlainText().strip()))
+        for i, boton in enumerate(self.botones_fase[1:], start=1):
+            boton.setEnabled(self.completadas >= i)
         for boton in self.pendientes:
             boton.setEnabled(False)
 
@@ -143,6 +151,26 @@ class Window(QMainWindow, Ui_MainWindow):
     def reiniciar_diagnostico(self, desde=0):
         for i in range(desde, len(self.fases)):
             self.marcar_fase(i, False)
+
+    def codigo_modificado(self):
+        """Cualquier cambio en el código invalida las fases anteriores."""
+        self.completadas = 0
+        self.reiniciar_diagnostico()
+        self.actualizar_botones()
+
+    def correr_fase(self, indice, nombre, fase):
+        """Ejecuta una fase; fase() regresa (salida, mensaje) o lanza Exception."""
+        try:
+            salida, mensaje = fase()
+        except Exception as error:
+            self.completadas = indice
+            self.reiniciar_diagnostico(desde=indice)
+            self.mostrar_consola(str(error), f"{nombre}: se encontró un error.", error=True)
+        else:
+            self.completadas = max(self.completadas, indice + 1)
+            self.marcar_fase(indice)
+            self.mostrar_consola(salida, mensaje)
+        self.actualizar_botones()
 
     # ---------------- Consola de salida ----------------
     def mostrar_consola(self, salida, mensaje="", error=False):
@@ -158,6 +186,15 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def ocultar_consola(self):
         self.consola.hide()
+
+    # ---------------- Fases de compilación ----------------
+    def analisis_lexico(self):
+        def fase():
+            tokens = lexico.analizar_lexico(self.editor.toPlainText())
+            filas = ["%-5s %-12s %s" % ("Línea", "Token", "Valor")]
+            filas += ["%-5d %-12s %r" % (linea, tipo, valor) for tipo, valor, linea in tokens]
+            return "\n".join(filas), f"Análisis léxico correcto: {len(tokens)} tokens."
+        self.correr_fase(0, "Análisis léxico", fase)
 
 
 app = QApplication(sys.argv)
