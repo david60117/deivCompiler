@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 
-from compilador import lexico, sintactico
+from compilador import lexico, semantico, sintactico
 from interfaz.principal import Ui_MainWindow
 
 CARPETA = Path(__file__).resolve().parent
@@ -53,13 +53,14 @@ class Window(QMainWindow, Ui_MainWindow):
                       (self.checkSemantico, self.textoSemantico),
                       (self.checkCodigo, self.textoCodigo)]
         # Fases que todavía no están programadas: sus botones se quedan desactivados
-        self.pendientes = [self.btnSemantico, self.btnGenerarCodigo, self.btnEjecutar]
+        self.pendientes = [self.btnGenerarCodigo, self.btnEjecutar]
 
         self.btnNuevo.clicked.connect(self.nuevo_archivo)
         self.btnAbrir.clicked.connect(self.abrir_archivo)
         self.btnGuardar.clicked.connect(self.guardar_archivo)
         self.btnLexico.clicked.connect(self.analisis_lexico)
         self.btnSintactico.clicked.connect(self.analisis_sintactico)
+        self.btnSemantico.clicked.connect(self.analisis_semantico)
         self.btnCerrarConsola.clicked.connect(self.ocultar_consola)
         self.editor.textChanged.connect(self.codigo_modificado)
 
@@ -207,6 +208,13 @@ class Window(QMainWindow, Ui_MainWindow):
                 raise Exception("Error sintáctico: no hay instrucciones")
             return pformat(self.arbol, width=100), "Análisis sintáctico correcto: árbol generado."
         self.correr_fase(1, "Análisis sintáctico", fase)
+
+    def analisis_semantico(self):
+        def fase():
+            declaradas = semantico.analizar_semantico(self.arbol)
+            lista = ", ".join(sorted(declaradas)) or "(ninguna)"
+            return "Variables declaradas: " + lista, "Análisis semántico correcto."
+        self.correr_fase(2, "Análisis semántico", fase)
 
 
 app = QApplication(sys.argv)
