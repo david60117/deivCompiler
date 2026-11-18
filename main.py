@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from pprint import pformat
 
 from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtWidgets import (
@@ -9,7 +10,7 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 
-from compilador import lexico
+from compilador import lexico, sintactico
 from interfaz.principal import Ui_MainWindow
 
 CARPETA = Path(__file__).resolve().parent
@@ -36,6 +37,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle("Compiler Studio")
         self.archivo_actual = None      # None = main.deiv sin guardar
+        self.arbol = None               # árbol del análisis sintáctico
         self.completadas = 0            # cuántas fases seguidas han pasado
 
         mono = elegir_fuente(("JetBrains Mono", "Menlo", "Consolas", "DejaVu Sans Mono"), "Courier New")
@@ -51,12 +53,13 @@ class Window(QMainWindow, Ui_MainWindow):
                       (self.checkSemantico, self.textoSemantico),
                       (self.checkCodigo, self.textoCodigo)]
         # Fases que todavía no están programadas: sus botones se quedan desactivados
-        self.pendientes = [self.btnSintactico, self.btnSemantico, self.btnGenerarCodigo, self.btnEjecutar]
+        self.pendientes = [self.btnSemantico, self.btnGenerarCodigo, self.btnEjecutar]
 
         self.btnNuevo.clicked.connect(self.nuevo_archivo)
         self.btnAbrir.clicked.connect(self.abrir_archivo)
         self.btnGuardar.clicked.connect(self.guardar_archivo)
         self.btnLexico.clicked.connect(self.analisis_lexico)
+        self.btnSintactico.clicked.connect(self.analisis_sintactico)
         self.btnCerrarConsola.clicked.connect(self.ocultar_consola)
         self.editor.textChanged.connect(self.codigo_modificado)
 
@@ -155,6 +158,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def codigo_modificado(self):
         """Cualquier cambio en el código invalida las fases anteriores."""
         self.completadas = 0
+        self.arbol = None
         self.reiniciar_diagnostico()
         self.actualizar_botones()
 
@@ -195,6 +199,14 @@ class Window(QMainWindow, Ui_MainWindow):
             filas += ["%-5d %-12s %r" % (linea, tipo, valor) for tipo, valor, linea in tokens]
             return "\n".join(filas), f"Análisis léxico correcto: {len(tokens)} tokens."
         self.correr_fase(0, "Análisis léxico", fase)
+
+    def analisis_sintactico(self):
+        def fase():
+            self.arbol = sintactico.analizar_sintactico(self.editor.toPlainText())
+            if not self.arbol:
+                raise Exception("Error sintáctico: no hay instrucciones")
+            return pformat(self.arbol, width=100), "Análisis sintáctico correcto: árbol generado."
+        self.correr_fase(1, "Análisis sintáctico", fase)
 
 
 app = QApplication(sys.argv)
