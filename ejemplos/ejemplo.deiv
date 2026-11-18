@@ -1,0 +1,35 @@
+/* Programa de ejemplo:
+   factorial, pares y promedio */
+
+// Factorial de 5 con insiste
+pan n = 5;
+pan factorial = 1;
+insiste (n > 1) {
+    factorial = factorial * n;
+    n = n - 1;
+}
+invocar("Factorial de 5:");
+invocar(factorial);
+
+// Números pares del 1 al 10 con para
+invocar("Pares del 1 al 10:");
+para (pan i = 1; i <= 10; i = i + 1) {
+    si_jala (i % 2 == 0) {
+        invocar(i);
+    }
+}
+
+// Promedio con decimales y una decisión
+migaja suma = 8.5 + 9.0 + 7.5;
+migaja promedio = suma / 3.0;
+invocar("Promedio:");
+invocar(promedio);
+
+sospecha aprobado = promedio >= 7.0 && !(promedio > 10.0);
+si_jala (promedio >= 9.0) {
+    invocar("Excelente");
+} valio si_jala (aprobado) {
+    invocar("Aprobado");
+} valio {
+    invocar("Reprobado");
+}
