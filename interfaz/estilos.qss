@@ -7,7 +7,7 @@ QWidget { font-size: 14px; color: #0F172A; }
 #encabezado { background: #F8FAFC; border-bottom: 1px solid #E2E8F0; }
 #iconoApp { color: #2563EB; font-size: 18px; font-weight: 700; }
 #titulo { font-size: 17px; font-weight: 600; }
-#indicadorEstado, #indicadorAnalisis {
+#indicadorAnalisis {
     background: #DCFCE7; color: #15803D; font-size: 13px; font-weight: 600;
     border-radius: 11px; padding: 3px 10px;
 }
@@ -60,3 +60,18 @@ QLabel[rol="fase"][marcada="true"] { color: #1E293B; }
 /* Misma tipografía que el editor, sin colores */
 #salida { background: #FFFFFF; border: none; color: #0F172A; font-size: 15px; font-weight: 400; }
 #mensaje { color: #64748B; }
+
+/* Búsqueda: lupa que se despliega en una barra */
+#btnBuscar { background: transparent; border: none; border-radius: 6px; padding: 5px; }
+#btnBuscar:hover { background: #E2E8F0; }
+#campoBuscar {
+    background: #FFFFFF; border: 2px solid #CBD5E1; border-radius: 15px;
+    padding: 4px 10px 4px 2px; font-size: 14px;
+}
+#campoBuscar:focus { border: 3px solid #8DA8DC; padding: 3px 9px 3px 1px; }
+#resultadosBuscar { color: #64748B; font-size: 13px; }
+#btnBuscarAnterior, #btnBuscarSiguiente {
+    background: transparent; border: none; border-radius: 6px; padding: 3px 7px; font-size: 15px; color: #475569;
+}
+#btnBuscarAnterior:hover, #btnBuscarSiguiente:hover { background: #E2E8F0; }
+#editor { selection-background-color: #BFDBFE; selection-color: #0F172A; }

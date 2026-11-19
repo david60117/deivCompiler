@@ -16,9 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-    QListWidget, QListWidgetItem, QMainWindow, QPlainTextEdit,
-    QPushButton, QSizePolicy, QSpacerItem, QToolButton,
-    QVBoxLayout, QWidget)
+    QLineEdit, QListWidget, QListWidgetItem, QMainWindow,
+    QPlainTextEdit, QPushButton, QSizePolicy, QSpacerItem,
+    QToolButton, QVBoxLayout, QWidget)
 
 from interfaz.editor import EditorCodigo
 
@@ -57,11 +57,6 @@ class Ui_MainWindow(object):
         self.espacioTitulo = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.layoutTitulo.addItem(self.espacioTitulo)
-
-        self.indicadorEstado = QLabel(self.encabezado)
-        self.indicadorEstado.setObjectName(u"indicadorEstado")
-
-        self.layoutTitulo.addWidget(self.indicadorEstado)
 
 
         self.layoutEncabezado.addLayout(self.layoutTitulo)
@@ -200,6 +195,54 @@ class Ui_MainWindow(object):
         self.espacioPestana = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.layoutPestana.addItem(self.espacioPestana)
+
+        self.btnBuscar = QToolButton(self.zonaEditor)
+        self.btnBuscar.setObjectName(u"btnBuscar")
+        self.btnBuscar.setIconSize(QSize(18, 18))
+        self.btnBuscar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.layoutPestana.addWidget(self.btnBuscar)
+
+        self.cajaBuscar = QWidget(self.zonaEditor)
+        self.cajaBuscar.setObjectName(u"cajaBuscar")
+        self.layoutCajaBuscar = QHBoxLayout(self.cajaBuscar)
+        self.layoutCajaBuscar.setSpacing(4)
+        self.layoutCajaBuscar.setObjectName(u"layoutCajaBuscar")
+        self.layoutCajaBuscar.setContentsMargins(0, 0, 0, 0)
+        self.campoBuscar = QLineEdit(self.cajaBuscar)
+        self.campoBuscar.setObjectName(u"campoBuscar")
+        self.campoBuscar.setMinimumSize(QSize(320, 0))
+        self.campoBuscar.setClearButtonEnabled(True)
+
+        self.layoutCajaBuscar.addWidget(self.campoBuscar)
+
+        self.resultadosBuscar = QLabel(self.cajaBuscar)
+        self.resultadosBuscar.setObjectName(u"resultadosBuscar")
+        self.resultadosBuscar.setMinimumSize(QSize(70, 0))
+        self.resultadosBuscar.setAlignment(Qt.AlignCenter)
+
+        self.layoutCajaBuscar.addWidget(self.resultadosBuscar)
+
+        self.btnBuscarAnterior = QToolButton(self.cajaBuscar)
+        self.btnBuscarAnterior.setObjectName(u"btnBuscarAnterior")
+        self.btnBuscarAnterior.setFocusPolicy(Qt.NoFocus)
+        self.btnBuscarAnterior.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.layoutCajaBuscar.addWidget(self.btnBuscarAnterior)
+
+        self.btnBuscarSiguiente = QToolButton(self.cajaBuscar)
+        self.btnBuscarSiguiente.setObjectName(u"btnBuscarSiguiente")
+        self.btnBuscarSiguiente.setFocusPolicy(Qt.NoFocus)
+        self.btnBuscarSiguiente.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.layoutCajaBuscar.addWidget(self.btnBuscarSiguiente)
+
+
+        self.layoutPestana.addWidget(self.cajaBuscar)
+
+        self.espacioEditor = QSpacerItem(16, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+
+        self.layoutPestana.addItem(self.espacioEditor)
 
         self.etiquetaEditor = QLabel(self.zonaEditor)
         self.etiquetaEditor.setObjectName(u"etiquetaEditor")
@@ -403,7 +446,6 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Compiler Studio", None))
         self.iconoApp.setText(QCoreApplication.translate("MainWindow", u"</>", None))
         self.titulo.setText(QCoreApplication.translate("MainWindow", u"Compiler Studio", None))
-        self.indicadorEstado.setText(QCoreApplication.translate("MainWindow", u"Listo", None))
         self.btnNuevo.setText(QCoreApplication.translate("MainWindow", u" Nuevo", None))
         self.btnAbrir.setText(QCoreApplication.translate("MainWindow", u" Abrir", None))
         self.btnGuardar.setText(QCoreApplication.translate("MainWindow", u" Guardar", None))
@@ -428,6 +470,18 @@ class Ui_MainWindow(object):
         self.listaArchivos.setSortingEnabled(__sortingEnabled)
 
         self.archivoActual.setText(QCoreApplication.translate("MainWindow", u"main.deiv", None))
+#if QT_CONFIG(tooltip)
+        self.btnBuscar.setToolTip(QCoreApplication.translate("MainWindow", u"Buscar en el c\u00f3digo (Cmd+F / Ctrl+F)", None))
+#endif // QT_CONFIG(tooltip)
+        self.campoBuscar.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Buscar", None))
+        self.btnBuscarAnterior.setText(QCoreApplication.translate("MainWindow", u"\u2191", None))
+#if QT_CONFIG(tooltip)
+        self.btnBuscarAnterior.setToolTip(QCoreApplication.translate("MainWindow", u"Anterior (Shift+Enter)", None))
+#endif // QT_CONFIG(tooltip)
+        self.btnBuscarSiguiente.setText(QCoreApplication.translate("MainWindow", u"\u2193", None))
+#if QT_CONFIG(tooltip)
+        self.btnBuscarSiguiente.setToolTip(QCoreApplication.translate("MainWindow", u"Siguiente (Enter)", None))
+#endif // QT_CONFIG(tooltip)
         self.etiquetaEditor.setText(QCoreApplication.translate("MainWindow", u"Editor", None))
         self.tituloDiagnostico.setText(QCoreApplication.translate("MainWindow", u"Diagn\u00f3stico del compilador", None))
         self.indicadorAnalisis.setText(QCoreApplication.translate("MainWindow", u"An\u00e1lisis completado", None))
