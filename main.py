@@ -4,11 +4,13 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from pprint import pformat
 
-from PySide6.QtGui import QFont, QFontDatabase, QIcon
+from PySide6.QtCore import QEasingCurve, QEvent, QPropertyAnimation, Qt
+from PySide6.QtGui import QFont, QFontDatabase, QIcon, QKeySequence, QShortcut, QTextCursor, QTextDocument
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QFileDialog,
+    QLineEdit,
     QMessageBox
 )
 
@@ -50,8 +52,16 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # Iconos de la barra de herramientas (interfaz/iconos/*.svg)
         for boton, icono in ((self.btnNuevo, "nuevo"), (self.btnAbrir, "abrir"), (self.btnGuardar, "guardar"),
-                             (self.btnCopiar, "copiar"), (self.btnPegar, "pegar")):
+                             (self.btnCopiar, "copiar"), (self.btnPegar, "pegar"), (self.btnBuscar, "buscar")):
             boton.setIcon(QIcon(str(CARPETA / "interfaz" / "iconos" / f"{icono}.svg")))
+
+        # Búsqueda: la lupa se despliega en una barra y se vuelve a ocultar cuando ya no se usa
+        self.campoBuscar.addAction(self.btnBuscar.icon(), QLineEdit.ActionPosition.LeadingPosition)
+        self.campoBuscar.installEventFilter(self)
+        self.animacionBuscar = QPropertyAnimation(self.cajaBuscar, b"maximumWidth", self)
+        self.animacionBuscar.setDuration(180)
+        self.animacionBuscar.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self.animacionBuscar.finished.connect(lambda: self.cajaBuscar.setMaximumWidth(16777215))
 
         # Botones de fase y filas del diagnóstico (icono, texto), en el mismo orden
         self.botones_fase = [self.btnLexico, self.btnSintactico, self.btnSemantico, self.btnGenerarCodigo]
@@ -65,6 +75,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.btnGuardar.clicked.connect(self.guardar_archivo)
         self.btnCopiar.clicked.connect(self.copiar)
         self.btnPegar.clicked.connect(self.pegar)
+        self.btnBuscar.clicked.connect(self.mostrar_buscar)
+        self.campoBuscar.textChanged.connect(self.buscar_al_escribir)
+        self.btnBuscarSiguiente.clicked.connect(self.buscar_siguiente)
+        self.btnBuscarAnterior.clicked.connect(self.buscar_anterior)
+        QShortcut(QKeySequence.StandardKey.Find, self).activated.connect(self.mostrar_buscar)   # Cmd+F / Ctrl+F
         self.btnLexico.clicked.connect(self.analisis_lexico)
         self.btnSintactico.clicked.connect(self.analisis_sintactico)
         self.btnSemantico.clicked.connect(self.analisis_semantico)
@@ -76,6 +91,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.listaArchivos.setCurrentRow(0)
         self.reiniciar_diagnostico()
         self.ocultar_consola()
+        self.cajaBuscar.hide()
         self.actualizar_botones()
 
         pantalla = self.screen().availableGeometry()
@@ -156,6 +172,78 @@ class Window(QMainWindow, Ui_MainWindow):
     def pegar(self):
         """Pega el texto del portapapeles donde está el cursor."""
         self.editor.paste()
+
+    # ---------------- Buscar ----------------
+    def mostrar_buscar(self):
+        """Despliega la barra de búsqueda a partir de la lupa."""
+        if not self.cajaBuscar.isVisible():
+            self.btnBuscar.hide()
+            self.cajaBuscar.show()
+            self.animacionBuscar.setStartValue(0)
+            self.animacionBuscar.setEndValue(self.cajaBuscar.sizeHint().width())
+            self.animacionBuscar.start()
+        self.campoBuscar.setFocus()
+        self.campoBuscar.selectAll()
+
+    def ocultar_buscar(self):
+        """Regresa a la lupa cuando la búsqueda ya no se usa."""
+        self.animacionBuscar.stop()
+        self.cajaBuscar.hide()
+        self.btnBuscar.show()
+
+    def eventFilter(self, objeto, evento):
+        """Teclas de la barra de búsqueda y ocultarla cuando pierde el foco."""
+        if objeto is self.campoBuscar:
+            if evento.type() == QEvent.Type.KeyPress:
+                if evento.key() == Qt.Key.Key_Escape:
+                    self.editor.setFocus()      # al perder el foco, la barra se oculta sola
+                    return True
+                if evento.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+                    if evento.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                        self.buscar_anterior()
+                    else:
+                        self.buscar_siguiente()
+                    return True
+            elif evento.type() == QEvent.Type.FocusOut and evento.reason() not in (
+                    Qt.FocusReason.ActiveWindowFocusReason, Qt.FocusReason.PopupFocusReason):
+                self.ocultar_buscar()
+        return super().eventFilter(objeto, evento)
+
+    def buscar_al_escribir(self):
+        """Mientras se escribe, busca desde el inicio de la coincidencia actual."""
+        cursor = self.editor.textCursor()
+        cursor.setPosition(cursor.selectionStart())
+        self.editor.setTextCursor(cursor)
+        self.buscar()
+
+    def buscar_siguiente(self):
+        self.buscar()
+
+    def buscar_anterior(self):
+        self.buscar(hacia_atras=True)
+
+    def buscar(self, hacia_atras=False):
+        """Selecciona la siguiente (o anterior) coincidencia; al llegar al final da la vuelta."""
+        texto = self.campoBuscar.text()
+        if not texto:
+            self.resultadosBuscar.clear()
+            return
+        opciones = QTextDocument.FindFlag.FindBackward if hacia_atras else QTextDocument.FindFlag(0)
+        inicio = self.editor.textCursor()
+        if not self.editor.find(texto, opciones):
+            cursor = QTextCursor(inicio)
+            cursor.movePosition(QTextCursor.MoveOperation.End if hacia_atras else QTextCursor.MoveOperation.Start)
+            self.editor.setTextCursor(cursor)
+            if not self.editor.find(texto, opciones):
+                self.editor.setTextCursor(inicio)      # no hay coincidencias: el cursor se queda donde estaba
+
+        codigo = self.editor.toPlainText().lower()
+        total = codigo.count(texto.lower())
+        if total == 0:
+            self.resultadosBuscar.setText("Sin resultados")
+        else:
+            actual = codigo[:self.editor.textCursor().selectionStart()].count(texto.lower()) + 1
+            self.resultadosBuscar.setText(f"{actual} de {total}")
 
     # ---------------- Botones y diagnóstico ----------------
     def actualizar_botones(self):
