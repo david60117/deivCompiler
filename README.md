@@ -128,21 +128,6 @@ ejemplos/
 ply/                     Biblioteca PLY (Python Lex-Yacc)
 ```
 
-## Desarrollo por fases
-
-El proyecto se construyó por fases. Cada una se trabajó en su propia rama y se integró a `main` cuando ya funcionaba:
-
-| Fase | Rama                        | Contenido                                   |
-|------|-----------------------------|---------------------------------------------|
-| 1    | `fase-1-interfaz`           | Interfaz gráfica (archivos, consola, diagnóstico) |
-| 2    | `fase-2-lexico`             | Analizador léxico                           |
-| 3    | `fase-3-sintactico`         | Analizador sintáctico y árbol               |
-| 4    | `fase-4-semantico`          | Análisis semántico                          |
-| 5    | `fase-5-codigo-intermedio`  | Código de tres direcciones                  |
-| 6    | `fase-6-ejecucion`          | Intérprete                                  |
-| 7    | `fase-7-toolbar`            | Barra de herramientas con copiar y pegar    |
-| 8    | `fase-8-buscar`             | Búsqueda en el código                       |
-
 ## Autor
 
 **David Jonathan Hernández Mejía**. Licenciatura en Ingeniería de Software, Grupo 301.
